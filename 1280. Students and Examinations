@@ -1,0 +1,21 @@
+WITH Student_Subject AS
+(
+    SELECT
+        *
+    FROM Students
+         CROSS JOIN Subjects
+)
+SELECT
+    SS.student_id
+    ,SS.student_name
+    ,SS.subject_name 
+    ,ISNULL(COUNT(E.student_id), 0) AS attended_exams
+FROM Student_Subject SS
+     LEFT JOIN Examinations E
+        ON E.student_id = SS.student_id
+           AND E.subject_name = SS.subject_name
+GROUP BY SS.student_id
+        ,SS.student_name
+        ,SS.subject_name
+ORDER BY SS.student_id
+         ,SS.subject_name;
