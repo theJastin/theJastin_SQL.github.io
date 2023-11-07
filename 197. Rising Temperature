@@ -4,3 +4,8 @@ FROM Weather W
 WHERE W.temperature > (SELECT WW.temperature 
                        FROM Weather WW 
                        WHERE WW.recordDate = DATEADD(day, -1, W.recordDate));
+
+-- popular solution
+SELECT w1.id
+FROM Weather AS w1 , Weather AS w2
+WHERE w1.Temperature > w2.Temperature AND DATEDIFF(w1.recordDate , w2.recordDate) = 1
