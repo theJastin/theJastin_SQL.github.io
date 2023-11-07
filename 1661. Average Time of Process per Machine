@@ -1,0 +1,15 @@
+WITH StartTime AS
+(
+    SELECT *
+    FROM Activity
+    WHERE activity_type = 'start'
+)
+SELECT 
+    ST.machine_id,
+    ROUND(AVG(ET.timestamp - ST.timestamp), 3) as processing_time
+FROM StartTime ST
+     INNER JOIN Activity ET
+     ON ET.machine_id = ST.machine_id
+        AND ET.process_id = ST.process_id
+        AND ET.activity_type = 'end'
+GROUP BY ST.machine_id
