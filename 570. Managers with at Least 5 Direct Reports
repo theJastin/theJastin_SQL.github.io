@@ -1,0 +1,27 @@
+------------solution 1----------------------
+SELECT
+    name
+FROM Employee
+WHERE id IN ( 
+    SELECT
+        managerId
+    FROM Employee
+    GROUP BY managerId
+    HAVING COUNT(managerId) >=5
+)
+------------solution 2----------------------
+WITH DirectReporters AS
+(
+    SELECT
+        managerId
+        ,ISNULL(COUNT(managerId), 0) AS DRCount
+    FROM Employee
+    WHERE managerId IS NOT NULL
+    GROUP BY managerId
+)
+SELECT
+    E.name
+FROM DirectReporters DR
+     INNER JOIN Employee E
+        ON E.id = DR.managerId
+WHERE DR.DRCount >= 5
