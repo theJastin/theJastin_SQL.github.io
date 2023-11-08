@@ -1,0 +1,13 @@
+DECLARE @TotalUsers int
+SELECT @TotalUsers = COUNT(user_id)
+FROM Users
+
+SELECT
+    R.contest_id
+    ,ROUND(((CAST(COUNT(R.user_id) AS NUMERIC(10,2))/@TotalUsers)*100.00), 2) AS percentage
+FROM Users U
+     INNER JOIN Register R
+        ON R.user_id = U.user_id
+GROUP BY R.contest_id
+ORDER BY percentage DESC
+         ,R.contest_id ASC
