@@ -1,0 +1,7 @@
+SELECT
+    P.project_id
+    ,ROUND(AVG(CAST(E.experience_years AS NUMERIC(10,2))), 2) as average_years
+FROM Project P
+     LEFT JOIN Employee E
+        ON E.employee_id = P.employee_id
+GROUP BY P.project_id
