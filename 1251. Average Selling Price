@@ -1,0 +1,17 @@
+WITH PriceCountTable AS
+(
+    SELECT
+        P.product_id
+        ,CAST(SUM(US.units) AS NUMERIC(10,2)) as TotalUnitsSold
+        ,CAST(SUM(US.units * P.price) AS NUMERIC(10,2)) as TotalPriceOfProduct
+    FROM Prices P
+        LEFT JOIN UnitsSold US
+            ON US.product_id = P.product_id
+            AND (US.purchase_date BETWEEN P.start_date AND P.end_date)
+            OR US.purchase_date IS NULL
+    GROUP BY P.product_id
+)
+SELECT
+    product_id
+    ,ISNULL(ROUND(TotalPriceOfProduct/TotalUnitsSold, 2), 0) AS average_price
+FROM PriceCountTable
