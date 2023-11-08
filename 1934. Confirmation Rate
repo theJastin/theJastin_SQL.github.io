@@ -1,0 +1,20 @@
+WITH NumReqTable AS
+(
+    SELECT 
+        C.user_id
+        ,CAST(COUNT(CASE WHEN C.action = 'confirmed' THEN C.user_id END) AS NUMERIC(10,2)) AS ConfNumReq
+        ,CAST(COUNT(C.user_id) AS NUMERIC(10,2)) AS TotalNumReq
+    FROM Confirmations C
+         LEFT JOIN Signups S 
+            ON S.user_id = C.user_id
+    GROUP BY C.user_id
+)
+SELECT
+    S.user_id
+    ,ISNULL(ROUND(NR.ConfNumReq/NR.TotalNumReq, 2), 0) AS confirmation_rate
+FROM Signups S
+     LEFT JOIN NumReqTable NR
+        ON NR.user_id = S.user_id
+GROUP BY S.user_id
+         ,NR.ConfNumReq
+         ,NR.TotalNumReq
