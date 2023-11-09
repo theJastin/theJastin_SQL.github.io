@@ -1,0 +1,14 @@
+WITH FirstOrdersTable AS
+(
+    SELECT
+        customer_id
+        ,MIN(order_date) AS MinOrderDate
+    FROM Delivery
+    GROUP BY customer_id
+)
+SELECT
+    ROUND((CAST(COUNT(CASE WHEN FOT.MinOrderDate = D.customer_pref_delivery_date THEN 1 END) AS float)/COUNT(FOT.customer_id))*100,2) AS immediate_percentage
+FROM FirstOrdersTable FOT
+     LEFT JOIN Delivery D
+        ON D.customer_id = FOT.customer_id
+           AND D.order_date = FOT.MinOrderDate
