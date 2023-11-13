@@ -1,0 +1,14 @@
+WITH FirstLoggedInTable AS
+(
+    SELECT
+        player_id
+        ,MIN(event_date) AS FirstLoggedInDate
+    FROM Activity
+    GROUP BY player_id
+)
+SELECT
+    ROUND(CAST(COUNT(A.player_id) AS float)/COUNT(FLI.player_id),2) AS fraction
+FROM FirstLoggedInTable FLI
+     LEFT JOIN Activity A
+        ON A.player_id = FLI.player_id
+           AND A.event_date = DATEADD(day, 1, FLI.FirstLoggedInDate)
