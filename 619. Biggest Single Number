@@ -1,3 +1,18 @@
+----------solution 1------------------------------------
+WITH CountNum AS
+(
+    SELECT
+        num
+        ,COUNT(num) AS CountNum
+    FROM MyNumbers
+    GROUP BY num
+    HAVING COUNT(num) = 1
+)
+SELECT
+    MAX(num) AS num
+FROM CountNum
+ORDER BY num DESC
+----------solution 2--------------------------------------
 WITH CountNum AS
 (
     SELECT
