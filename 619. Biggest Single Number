@@ -1,0 +1,12 @@
+WITH CountNum AS
+(
+    SELECT
+        num
+        ,COUNT(num) AS CountNum
+    FROM MyNumbers
+    GROUP BY num
+)
+SELECT
+    TOP 1 CASE WHEN CountNum = 1 THEN num ELSE null END AS num
+FROM CountNum
+ORDER BY num DESC
