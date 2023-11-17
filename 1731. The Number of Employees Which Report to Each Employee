@@ -1,0 +1,19 @@
+WITH TotalReportsTable AS
+(
+    SELECT
+        reports_to AS employee_id
+        ,COUNT(reports_to) AS reports_count
+        ,ROUND(SUM(age)*1.00/COUNT(reports_to), 0) AS average_age
+    FROM Employees E
+    GROUP BY reports_to
+    HAVING reports_to IS NOT NULL
+)
+SELECT
+    TRT.employee_id
+    ,E.name
+    ,TRT.reports_count
+    ,TRT.average_age
+FROM TotalReportsTable TRT
+     INNER JOIN Employees E
+        ON E.employee_id = TRT.employee_id
+ORDER BY TRT.employee_id
