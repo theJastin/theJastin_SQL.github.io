@@ -13,6 +13,8 @@ SELECT
 FROM Employee
 GROUP BY employee_id
 HAVING COUNT(*) = 1
+
+ORDER BY employee_id
 ---------------solution 2-----------------------------
 WITH EmpPrimeDepTable AS
 (
