@@ -1,0 +1,17 @@
+WITH PrepTable AS
+(
+    SELECT
+        P.product_id
+        ,MAX(PP.change_date) as max_change_date
+    FROM Products P
+        LEFT JOIN Products PP
+            ON PP.product_id = P.product_id
+                AND PP.change_date <= '2019-08-16'
+    GROUP BY P.product_id
+)
+SELECT
+    PT.product_id
+    ,(CASE WHEN P.new_price IS NOT NULL THEN P.new_price ELSE 10 END) AS price
+FROM PrepTable PT
+     LEFT JOIN Products P
+        ON P.product_id = PT.product_id AND P.change_date = PT.max_change_date
