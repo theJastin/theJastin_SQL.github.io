@@ -1,3 +1,18 @@
+----------solution 1-----------------------
+WITH PrepTable AS
+(
+    SELECT
+        LAG(num) OVER (ORDER BY id) AS PrevNum
+        ,num
+        ,LEAD(num) OVER (ORDER BY id) AS NextNum
+    FROM Logs
+
+)
+SELECT
+    DISTINCT num as ConsecutiveNums
+FROM PrepTable
+WHERE PrevNum = num AND num = NextNum
+----------solution 2-----------------------
 SELECT
     DISTINCT L1.num AS ConsecutiveNums
 FROM Logs L1
