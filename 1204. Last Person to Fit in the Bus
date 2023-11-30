@@ -1,0 +1,13 @@
+WITH PrepTable AS
+(
+    SELECT
+        person_name
+        ,SUM(weight) OVER (ORDER BY turn) AS RunningTotal
+        ,turn
+    FROM Queue
+)
+SELECT 
+   TOP 1 person_name 
+FROM PrepTable
+WHERE RunningTotal <= 1000
+ORDER BY RunningTotal DESC
