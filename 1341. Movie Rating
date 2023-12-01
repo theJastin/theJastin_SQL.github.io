@@ -1,0 +1,30 @@
+SELECT 
+    name AS results 
+FROM Users
+WHERE user_id =
+( 
+    SELECT TOP 1
+        MR.user_id
+    FROM MovieRating MR
+        INNER JOIN Users U
+            ON U.user_id = MR.user_id
+    GROUP BY MR.user_id, U.name
+    ORDER BY COUNT(MR.movie_id) DESC, U.name
+)
+
+UNION ALL
+
+SELECT 
+    title AS results 
+FROM Movies
+WHERE movie_id =
+(
+    SELECT TOP 1
+        MR.movie_id
+    FROM MovieRating MR
+        INNER JOIN Movies M
+            ON M.movie_id = MR.movie_id
+    WHERE MR.created_at BETWEEN '2020-02-01' AND '2020-02-29'
+    GROUP BY MR.movie_id, M.title
+    ORDER BY AVG(MR.rating+0.00) DESC, M.title
+)
