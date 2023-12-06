@@ -1,0 +1,20 @@
+WITH PrepTable AS
+(
+    SELECT
+        ROW_NUMBER() OVER (ORDER BY visited_on) as RowNumber
+        ,visited_on
+        ,SUM(amount) OVER (ORDER BY visited_on ROWS 6 PRECEDING) AS amount
+        ,ROUND((SUM(amount) OVER (ORDER BY visited_on ROWS 6 PRECEDING)+0.00)/7, 2) AS average_amount
+    FROM 
+    (SELECT visited_on ,SUM(amount) AS amount
+     FROM Customer 
+     GROUP BY visited_on
+    ) AS tmp
+)
+SELECT 
+    visited_on
+    ,amount
+    ,average_amount 
+FROM PrepTable
+WHERE (RowNumber - 6) > 0
+ORDER BY visited_on
