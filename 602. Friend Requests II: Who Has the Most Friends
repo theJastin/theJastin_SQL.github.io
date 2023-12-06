@@ -14,16 +14,11 @@ WITH cte AS
         ,COUNT(*) AS num
     FROM RequestAccepted
     GROUP BY accepter_id
-), cte2 AS
-(
-    SELECT
-        id
-        ,SUM(num) AS num
-    FROM cte
-    GROUP BY id
 )
-SELECT 
+SELECT
     TOP 1 id
-    ,num
-FROM cte2
+    ,SUM(num) AS num
+FROM cte
+GROUP BY id
 ORDER BY num DESC
+
