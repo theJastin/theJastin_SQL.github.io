@@ -1,3 +1,4 @@
+----------solution1--------------------------------------
 WITH PrepTable AS
 (
     SELECT
@@ -17,4 +18,27 @@ SELECT
     ,average_amount 
 FROM PrepTable
 WHERE (RowNumber - 6) > 0
+ORDER BY visited_on
+---------------solution2------------------------------
+WITH PrepTable AS
+(
+    SELECT
+        C.customer_id
+        --,CC.amount
+        ,C.visited_on
+        --,CC.visited_on
+        ,SUM(CC.amount) AS sum_amount
+    FROM Customer C
+        CROSS JOIN Customer CC
+    WHERE CC.visited_on BETWEEN DATEADD(day, -6, C.visited_on) AND C.visited_on
+    GROUP BY C.customer_id, C.visited_on
+    HAVING (SELECT DISTINCT customer_id FROM Customer WHERE visited_on = DATEADD(day, -6, C.visited_on)) IS NOT NULL
+    --ORDER BY C.customer_id DESC
+)
+SELECT
+    visited_on
+    ,sum_amount as amount
+    ,ROUND((sum_amount+0.00)/7, 2) AS average_amount
+FROM PrepTable
+GROUP BY visited_on, sum_amount
 ORDER BY visited_on
