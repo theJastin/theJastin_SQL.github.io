@@ -1,0 +1,17 @@
+WITH cte AS
+(
+    SELECT
+        D.name AS Department
+        ,E.name AS Employee
+        ,E.salary
+        ,DENSE_RANK() OVER(PARTITION BY E.departmentId ORDER BY salary DESC) AS erank
+    FROM Department D
+        INNER JOIN Employee E
+            ON D.id = E.departmentId
+)
+SELECT
+    Department
+    ,Employee
+    ,Salary
+FROM cte
+WHERE erank < 4
