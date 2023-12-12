@@ -1,0 +1,20 @@
+WITH cte AS
+(
+    SELECT
+        email
+        ,MIN(id) AS id
+    FROM Person
+    GROUP BY email
+    HAVING COUNT(id) > 1
+
+    UNION 
+
+    SELECT
+        email
+        ,MIN(id) AS id
+    FROM Person 
+    GROUP BY email
+    HAVING COUNT(id) = 1
+)
+DELETE FROM Person
+WHERE id NOT IN (SELECT id FROM cte)
