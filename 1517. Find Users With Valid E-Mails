@@ -3,3 +3,7 @@ SELECT
 FROM Users
 WHERE mail like '[A-Za-z]%@leetcode.com'
       AND LEFT(mail, LEN(mail) - 13) NOT LIKE '%[^0-9a-zA-Z_.-]%'
+
+symbol '^' means NOT.
+And second negation here NOT LIKE. So, not this symbols means other remaining symbols, then we use second negation which means, 
+not this others remaining characters and also means that we need ONLY this symbols '%[^a-zA-Z0-9.-]%'.
