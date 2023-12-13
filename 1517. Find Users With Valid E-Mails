@@ -1,0 +1,5 @@
+SELECT
+    *
+FROM Users
+WHERE mail like '[A-Za-z]%@leetcode.com'
+      AND LEFT(mail, LEN(mail) - 13) NOT LIKE '%[^0-9a-zA-Z_.-]%'
