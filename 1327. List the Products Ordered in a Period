@@ -1,0 +1,27 @@
+------------------solution 1---------------------------
+SELECT
+    P.product_name
+    ,SUM(O.unit) AS unit
+FROM Orders O
+    INNER JOIN Products P
+        ON P.product_id = O.product_id
+WHERE order_date like '2020-02%'
+GROUP BY P.product_name
+HAVING SUM(O.unit) >= 100
+------------------solution 2---------------------------
+WITH cte AS
+(
+    SELECT
+        product_id
+        ,SUM(unit) AS totalunitssold
+    FROM Orders
+    WHERE order_date BETWEEN '2020-02-01' AND '2020-02-29'
+    GROUP BY product_id
+)
+SELECT
+    P.product_name
+    ,O.totalunitssold AS unit
+FROM cte O
+    INNER JOIN Products P
+        ON P.product_id = O.product_id
+WHERE O.totalunitssold >= 100
