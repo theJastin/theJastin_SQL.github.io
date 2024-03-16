@@ -1,0 +1,43 @@
+CREATE TABLE employees
+(
+	emp_id INT IDENTITY(1,1) PRIMARY KEY,
+	first_name VARCHAR(15),
+	last_name VARCHAR(15),
+	name VARCHAR(100),
+	emp_amt INT
+)
+INSERT INTO employees (first_name, last_name, name, emp_amt)
+VALUES ('ANNA', 'PEREZ', NULL, NULL)
+
+UPDATE employees
+SET name = first_name + ' ' + last_name
+
+CREATE TABLE sales
+(
+	sale_id INT IDENTITY(1,1) PRIMARY KEY,
+	emp_id INT,
+	sale_amt INT
+)
+
+INSERT INTO sales (emp_id, sale_amt)
+VALUES (4, 10)
+
+SELECT
+	E.emp_id
+	,SUM(S.sale_amt)
+FROM employees E
+	 INNER JOIN sales S ON S.emp_id = E.emp_id
+GROUP BY E.emp_id
+
+UPDATE
+	employees 
+
+SET emp_amt = T.sum_amt
+FROM employees E
+	 INNER JOIN (
+		SELECT 
+			SUM(S.sale_amt) as sum_amt
+			,emp_id as emp_id1
+		FROM sales S 
+		GROUP BY emp_id
+	) as T ON T.emp_id1 = E.emp_id
