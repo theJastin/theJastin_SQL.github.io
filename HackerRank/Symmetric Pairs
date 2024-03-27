@@ -1,0 +1,28 @@
+---------------------solution----------------------------
+WITH CTE
+AS
+(
+    SELECT X,Y
+        ,ROW_NUMBER() OVER (ORDER BY X) AS row_num
+    FROM functions
+) 
+SELECT
+    DISTINCT F1.X, F1.Y
+FROM CTE AS F1
+     INNER JOIN CTE F2 ON F2.X = F1.Y AND F2.Y = F1.X
+WHERE F1.row_num != F2.row_num
+      AND F1.X <= F1.Y
+ORDER BY F1.X;
+
+/* Symmetric Pairs problem
+You are given a table, Functions, containing two columns: X and Y.
+Two pairs (X1, Y1) and (X2, Y2) are said to be symmetric pairs if X1 = Y2 and X2 = Y1.
+Write a query to output all such symmetric pairs in ascending order by the value of X. List the rows such that X1 ≤ Y1.
+
+Sample Input
+Sample Output
+
+20 20
+20 21
+22 23
+*/
