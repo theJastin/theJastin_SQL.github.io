@@ -1,0 +1,41 @@
+------------------solution----------------------------------
+WITH CTE
+AS
+(
+    SELECT
+        Ch.college_id
+        ,Ch.challenge_id
+        ,(SELECT SUM(total_submissions) FROM submission_stats WHERE challenge_id = Ch.challenge_id) AS sum_total_submissions
+        ,(SELECT SUM(total_accepted_submissions) FROM submission_stats WHERE challenge_id = Ch.challenge_id) AS sum_total_accepted_submissions
+        ,(SELECT SUM(total_views) FROM view_stats WHERE challenge_id = Ch.challenge_id) AS sum_total_views
+        ,(SELECT SUM(total_unique_views) FROM view_stats WHERE challenge_id = Ch.challenge_id) AS sum_total_unique_views
+    FROM challenges Ch 
+    --WHERE Ch.college_id = 3265
+)
+SELECT 
+     C.contest_id
+    ,C.hacker_id
+    ,C.name
+    ,SUM(sum_total_submissions)
+    ,SUM(sum_total_accepted_submissions)
+    ,SUM(sum_total_views)
+    ,SUM(sum_total_unique_views)
+FROM CTE Ch
+     INNER JOIN colleges Cl ON Cl.college_id = Ch.college_id
+     INNER JOIN contests C ON C.contest_id = Cl.contest_id
+GROUP BY C.contest_id, C.hacker_id, C.name
+ORDER BY C.contest_id;
+
+/* problem
+Samantha interviews many candidates from different colleges using coding challenges and contests. 
+Write a query to print the contest_id, hacker_id, name, and the sums of total_submissions, total_accepted_submissions, total_views, 
+and total_unique_views for each contest sorted by contest_id. Exclude the contest from the result if all four sums are.
+Note: A specific contest can be used to screen candidates at more than one college, but each college only holds  screening contest.
+
+The following tables hold interview data:
+Contests: The contest_id is the id of the contest, hacker_id is the id of the hacker who created the contest, and name is the name of the hacker. 
+Colleges: The college_id is the id of the college, and contest_id is the id of the contest that Samantha used to screen the candidates. 
+Challenges: The challenge_id is the id of the challenge that belongs to one of the contests whose contest_id Samantha forgot, and college_id is the id of the college where the challenge was given to candidates. 
+View_Stats: The challenge_id is the id of the challenge, total_views is the number of times the challenge was viewed by candidates, and total_unique_views is the number of times the challenge was viewed by unique candidates. 
+Submission_Stats: The challenge_id is the id of the challenge, total_submissions is the number of submissions for the challenge, and total_accepted_submission is the number of submissions that achieved full scores. 
+*/
