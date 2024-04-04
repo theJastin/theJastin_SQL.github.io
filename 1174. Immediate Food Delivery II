@@ -1,4 +1,17 @@
-// solution
+------------------solution1---------------------------------
+SELECT
+    ROUND((CAST(COUNT(CASE WHEN order_date = customer_pref_delivery_date THEN 1.0 END) AS FLOAT)/COUNT(*))*100,2) AS immediate_percentage
+FROM
+(
+    SELECT
+        customer_id
+        ,order_date
+        ,RANK() OVER(PARTITION BY customer_id ORDER BY order_date) AS order_rank
+        ,customer_pref_delivery_date
+    FROM delivery
+) AS first_orders
+WHERE order_rank = 1 
+------------------solution2---------------------------------
 WITH FirstOrdersTable AS
 (
     SELECT
