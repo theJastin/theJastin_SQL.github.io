@@ -10,6 +10,21 @@ WHERE id IN (
     HAVING COUNT(managerId) >=5
 )
 ------------solution 2----------------------
+WITH CTE
+AS
+(
+    SELECT
+         managerid
+        ,COUNT(*) AS direct_reports_count
+    FROM employee
+    GROUP BY managerid 
+    HAVING COUNT(*) > 4
+)
+SELECT 
+    E.name
+FROM CTE C
+     INNER JOIN employee E ON E.id = C.managerid;
+------------solution 3-----------------------
 WITH DirectReporters AS
 (
     SELECT
