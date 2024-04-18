@@ -1,0 +1,148 @@
+/*
+Find the latest 3 content belonging to each content status group. 
+Provide the username of the content author, content (if the content is not a post or comment, specify 'N/A' instead), 
+status, and posted date.
+*/
+WITH top3 AS
+(
+	SELECT
+		*
+		,DENSE_RANK() OVER(PARTITION BY status ORDER BY postdate DESC) AS rank
+	FROM Content1
+)
+SELECT
+	 U.username
+	,CASE 
+		WHEN t3.contenttype IN ('POST', 'COMMENT') THEN t3.contentbody 
+		ELSE 'N/A' END AS content
+	,t3.status
+	,t3.postdate
+FROM top3 t3
+	 INNER JOIN users1 U ON U.userID = t3.userID
+WHERE t3.rank < 4
+
+/* Return every single instance of a content being created or moderated, sorted in 
+descending order by the date (PostDate on content creation, or ActionDate on content moderation),
+as a single table. For each instance, provide the content's ID, the content body (or Null if there is none), 
+the action type (either 'Creation' or 'Moderation'), 
+Date and DaysSinceLastEvent. The day since last event is the number of days since the previous 
+content creation/moderation instance took place.
+*/
+WITH CTE AS
+(
+	SELECT 
+		 contentID
+		,contentbody
+		,'Creation' AS actiontype
+		,postdate AS date
+	FROM content1
+
+	UNION ALL
+
+	SELECT 
+		 R.reportedcontentID AS contentID
+		,C.contentbody
+		,'Moderation' AS actiontype
+		,MA.actiondate AS date
+	FROM ModerationActions1 MA
+		 INNER JOIN reports1 R ON R.reportID = MA.reportID
+		 INNER JOIN content1 C ON C.contentID = R.reportedcontentID
+)
+SELECT
+	 *
+	,LAG(date, 1, date) OVER(PARTITION BY contentID ORDER BY date)
+	,DATEDIFF(day, LAG(date, 1, date) OVER(PARTITION BY contentID ORDER BY date), date) AS DaysSinceLastEvent
+FROM CTE
+ORDER BY date DESC
+
+--SQL lite version
+WITH CTE AS
+(
+  SELECT 
+     contentID
+    ,contentbody
+    ,'Creation' AS actiontype
+    ,postdate AS date
+  FROM content
+
+  UNION ALL
+
+  SELECT 
+     R.reportedcontentID AS contentID
+    ,C.contentbody
+    ,'Moderation' AS actiontype
+    ,MA.actiondate AS date
+  FROM ModerationActions MA
+     INNER JOIN reports R ON R.reportID = MA.reportID
+     INNER JOIN content C ON C.contentID = R.reportedcontentID
+)
+SELECT
+   *
+  ,CAST((julianday(date) - julianday(LAG(date, 1, date) OVER(PARTITION BY contentID ORDER BY date))) AS INTEGER) AS DaysSinceLastEvent
+FROM CTE
+ORDER BY date DESC
+
+/*
+Return all moderatorns by their performance in descending order. Moderator's performance based on the average number of reports closed per day during their active tenure. Additionally, you need to list the total number of appeals initiated for the reports handled by each moderator. In your report provide moderatorID, userID, username, email, tenure days, total closed reports, total appeals, average reports closed per day. 
+*/
+
+WITH ModStatCTE AS 
+(
+    SELECT
+         M.moderatorID
+    	,M.userID
+        ,COUNT(R.reportID) AS total_closed_reports
+        ,COUNT(DISTINCT A.appealID) AS total_appeals
+        ,(julianday(COALESCE(M.enddate, date('now'))) - julianday(M.startdate)) AS tenure_days
+    FROM moderators M
+     INNER JOIN moderationActions MA ON MA.moderatorID = M.moderatorID
+     INNER JOIN reports R ON R.reportID = MA.reportID AND R.status = 'CLOSED'
+     LEFT JOIN appeals A ON A.contentID = MA.reportID
+    GROUP BY M.moderatorID 
+        ,M.userID 
+      ,M.startdate 
+      ,M.enddate
+)
+SELECT
+   CTE.moderatorID
+  ,CTE.userID
+  ,U.username
+  ,U.email
+  ,CTE.tenure_days
+  ,CTE.total_closed_reports
+  ,CTE.total_appeals
+  ,CAST((CTE.total_closed_reports / CTE.tenure_days) AS DECIMAL(10,5)) AS avg_reports_closed_per_day
+FROM ModStatCTE CTE
+   INNER JOIN users U ON U.userID = CTE.userID
+ORDER BY avg_reports_closed_per_day DESC
+
+-- SQL lite version
+WITH ModStatCTE AS 
+(
+    SELECT
+         M.moderatorID
+        ,M.userID
+        ,COUNT(R.reportID) AS total_closed_reports
+        ,COUNT(DISTINCT A.appealID) AS total_appeals
+        ,(julianday(COALESCE(M.enddate, date('now'))) - julianday(M.startdate)) AS tenure_days
+    FROM moderators M
+        INNER JOIN moderationActions MA ON MA.moderatorID = M.moderatorID
+        INNER JOIN reports R ON R.reportID = MA.reportID AND R.status = 'CLOSED'
+        LEFT JOIN appeals A ON A.contentID = MA.reportID
+    GROUP BY M.moderatorID 
+            ,M.userID 
+            ,M.startdate 
+            ,M.enddate
+)
+SELECT
+     CTE.moderatorID
+    ,CTE.userID
+    ,U.username
+    ,U.email
+    ,CTE.tenure_days
+    ,CTE.total_closed_reports
+    ,CTE.total_appeals
+    ,CAST((CTE.total_closed_reports / CTE.tenure_days) AS DECIMAL(10,5)) AS avg_reports_closed_per_day
+FROM ModStatCTE CTE
+   INNER JOIN users U ON U.userID = CTE.userID
+ORDER BY avg_reports_closed_per_day DESC
