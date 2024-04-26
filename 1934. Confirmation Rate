@@ -1,3 +1,10 @@
+-----------------solution 1----------------------------------
+SELECT
+     S.user_id
+    ,ROUND((COUNT(CASE WHEN C.action = 'confirmed' THEN 1 END)*1.00 / COUNT(*)), 2) AS confirmation_rate
+FROM Signups S
+     LEFT JOIN Confirmations C ON C.user_id = S.user_id
+GROUP BY S.user_id
 -----------------solution T-SQL------------------------------
 WITH NumReqTable AS
 (
