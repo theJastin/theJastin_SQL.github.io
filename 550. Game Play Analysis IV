@@ -1,4 +1,16 @@
-// solution
+-----------solution1-----------------------------------
+SELECT
+    ROUND(COUNT(CASE WHEN next_logged_in = DATEADD(day, 1, first_logged_in) THEN 1 END)*1.00 / COUNT(*), 2) AS fraction
+FROM (
+        SELECT
+            player_id
+            ,event_date AS first_logged_in
+            ,RANK() OVER(PARTITION BY player_id ORDER BY event_date) AS rank
+            ,LEAD(event_date) OVER (PARTITION BY player_id ORDER BY event_date) AS next_logged_in
+        FROM Activity
+     ) AS logged_in_again
+WHERE rank = 1
+-----------solution2-----------------------------------
 WITH FirstLoggedInTable AS
 (
     SELECT
