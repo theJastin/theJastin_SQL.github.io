@@ -1,6 +1,6 @@
 ------------------solution1---------------------------------
 SELECT
-    ROUND((CAST(COUNT(CASE WHEN order_date = customer_pref_delivery_date THEN 1 END) AS FLOAT)/COUNT(*))*100,2) AS immediate_percentage
+    ROUND(COUNT(CASE WHEN order_date = customer_pref_delivery_date THEN 1 END)*100.00 / COUNT(*), 2) AS immediate_percentage
 FROM
 (
     SELECT
@@ -21,7 +21,7 @@ WITH FirstOrdersTable AS
     GROUP BY customer_id
 )
 SELECT
-    ROUND((CAST(COUNT(CASE WHEN FOT.MinOrderDate = D.customer_pref_delivery_date THEN 1 END) AS float)/COUNT(FOT.customer_id))*100,2) AS immediate_percentage
+    ROUND(COUNT(CASE WHEN FOT.MinOrderDate = D.customer_pref_delivery_date THEN 1 END)*100.00 / COUNT(*), 2) AS immediate_percentage
 FROM FirstOrdersTable FOT
      LEFT JOIN Delivery D
         ON D.customer_id = FOT.customer_id
