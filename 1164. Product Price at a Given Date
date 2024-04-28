@@ -1,4 +1,39 @@
-// solution
+-------------------------solution1------------------------------------
+/* Write your T-SQL query statement below */
+WITH NoChangePrice AS
+(
+    SELECT
+        product_id
+        ,10 AS price
+    FROM Products P
+    GROUP BY product_id
+    HAVING MIN(change_date) > '2019-08-16'
+),
+MaxChangeDate AS
+(
+    SELECT 
+         product_id
+        ,MAX(change_date) AS max_change_date
+    FROM Products
+    WHERE change_date <= '2019-08-16'
+    GROUP BY product_id
+),
+NewPrice AS
+(
+    SELECT
+         M.product_id
+        ,P.new_price AS price
+    FROM MaxChangeDate M 
+         INNER JOIN Products P ON P.product_id = M.product_id AND P.change_date = M.max_change_date
+)
+SELECT *
+FROM NoChangePrice
+
+UNION 
+
+SELECT *
+FROM NewPrice
+------------------------ solution2------------------------------------
 WITH PrepTable AS
 (
     SELECT
