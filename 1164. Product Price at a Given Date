@@ -33,7 +33,46 @@ UNION
 
 SELECT *
 FROM NewPrice
------------------------- solution2------------------------------------
+------------------------solution2------------------------------------
+WITH NoPriceChangePrepTable AS
+(
+    SELECT
+         *
+        ,ROW_NUMBER() OVER(PARTITION BY product_id ORDER BY change_date) AS row_num
+    FROM Products
+),
+NoPriceChangeTable AS
+(
+    SELECT 
+         product_id
+        ,10 AS price
+    FROM NoPriceChangePrepTable
+    WHERE row_num = 1 AND change_date > '2019-08-16'
+),
+PriceChangedPrepTable AS
+(
+    SELECT
+         *
+        ,ROW_NUMBER() OVER(PARTITION BY product_id ORDER BY change_date DESC) AS row_num
+    FROM Products
+    WHERE change_date <= '2019-08-16'
+),
+PriceChangedTable AS
+(
+    SELECT
+         product_id
+        ,new_price AS price
+    FROM PriceChangedPrepTable
+    WHERE row_num = 1
+)
+SELECT *
+FROM PriceChangedTable
+
+UNION
+
+SELECT *
+FROM NoPriceChangeTable
+------------------------ solution3------------------------------------
 WITH PrepTable AS
 (
     SELECT
