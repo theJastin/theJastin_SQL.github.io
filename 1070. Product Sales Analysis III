@@ -13,7 +13,6 @@ SELECT
     ,price
 FROM CTE 
 WHERE row_num = 1
-ORDER BY product_id DESC
 ----------------solution2-----------------------------
 WITH FirstYearProductSold AS
 (
