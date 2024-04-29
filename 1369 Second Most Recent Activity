@@ -1,0 +1,20 @@
+-- 1369 Second Most Recent Activity
+WITH SecondActivityPrepTable AS
+(
+    SELECT
+        username
+        ,activity
+        ,startdate
+        ,enddate
+        ,LEAD(startdate) OVER(PARTITION BY username ORDER BY startdate DESC) AS second_startdate
+        ,LEAD(enddate) OVER(PARTITION BY username ORDER BY startdate DESC) AS second_enddate
+        ,DENSE_RANK() OVER(PARTITION BY username ORDER BY startdate DESC) AS rank
+    FROM UserActivity
+)
+SELECT
+    DISTINCT username
+    ,activity
+    ,COALESCE(second_startdate, startdate) AS startdate
+    ,COALESCE(second_enddate, enddate) AS enddate       
+FROM SecondActivityPrepTable
+WHERE rank = 1
