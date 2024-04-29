@@ -1,4 +1,11 @@
 ----------solution 1-----------------------
+SELECT 
+    DISTINCT L1.num AS ConsecutiveNums
+FROM Logs L1
+     INNER JOIN Logs L2 ON L2.id = L1.id+1
+     INNER JOIN Logs L3 ON L3.id = L2.id+1
+WHERE L1.num = L2.num AND L2.num = L3.num
+----------solution 2-----------------------
 WITH PrepTable AS
 (
     SELECT
@@ -12,15 +19,12 @@ SELECT
     DISTINCT num as ConsecutiveNums
 FROM PrepTable
 WHERE PrevNum = num AND num = NextNum
-----------solution 2-----------------------
+---------solution 3------------------------
 SELECT
     DISTINCT L1.num AS ConsecutiveNums
-FROM Logs L1
-     INNER JOIN Logs L2
-        ON L2.id = L1.id + 1
-     INNER JOIN Logs L3
-        ON L3.id = L1.id + 2
-WHERE L1.num = L2.num AND L2.num = L3.num
+FROM Logs L1, Logs L2, Logs L3
+WHERE L1.id = L2.id+1 AND L2.id = L3.id+1
+      AND L1.num = L2.num AND L2.num = L3.num
 
 // problem
 Table: Logs
