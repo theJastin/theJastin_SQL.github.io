@@ -1,4 +1,20 @@
-// solution
+----------------solution1-----------------------------
+WITH CTE AS
+(
+    SELECT
+        *
+        ,ROW_NUMBER() OVER(PARTITION BY product_id ORDER BY year) AS row_num
+    FROM Sales
+)
+SELECT 
+     product_id
+    ,year AS first_year
+    ,quantity 
+    ,price
+FROM CTE 
+WHERE row_num = 1
+ORDER BY product_id DESC
+----------------solution2-----------------------------
 WITH FirstYearProductSold AS
 (
     SELECT
