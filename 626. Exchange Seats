@@ -1,4 +1,21 @@
-// solution
+-----------------solution1----------------------------------------
+WITH CTE AS
+(
+    SELECT
+        id
+        ,student
+        ,LAG(student) OVER(ORDER BY id) AS above_student
+        ,LEAD(student) OVER(ORDER BY id) AS below_student
+    FROM Seat
+)
+SELECT 
+     id
+    ,(CASE 
+        WHEN id%2 = 1 THEN COALESCE(below_student, student)
+        WHEN id%2 = 0 THEN above_student
+      END) AS student
+FROM CTE
+-----------------solution2----------------------------------------
 SELECT
     id
     ,(CASE 
