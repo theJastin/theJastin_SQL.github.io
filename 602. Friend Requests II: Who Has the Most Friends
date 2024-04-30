@@ -1,7 +1,7 @@
 // solution
-WITH cte AS
+WITH CTE AS
 (
-    SELECT
+    SELECT 
         requester_id AS id
         ,COUNT(*) AS num
     FROM RequestAccepted
@@ -9,16 +9,16 @@ WITH cte AS
 
     UNION ALL
 
-    SELECT
+    SELECT 
         accepter_id AS id
         ,COUNT(*) AS num
     FROM RequestAccepted
     GROUP BY accepter_id
 )
-SELECT
-    TOP 1 id
-    ,SUM(num) AS num
-FROM cte
+SELECT 
+    TOP 1 id,
+    SUM(num) AS num
+FROM CTE
 GROUP BY id
 ORDER BY num DESC
 
