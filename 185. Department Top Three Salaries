@@ -1,21 +1,21 @@
 // solution
-WITH cte AS
+WITH CTE AS
 (
     SELECT
-        D.name AS Department
-        ,E.name AS Employee
+        D.name AS department_name
+        ,E.name AS employee_name
         ,E.salary
-        ,DENSE_RANK() OVER(PARTITION BY E.departmentId ORDER BY salary DESC) AS erank
-    FROM Department D
-        INNER JOIN Employee E
-            ON D.id = E.departmentId
+        ,DENSE_RANK() OVER(PARTITION BY E.departmentId ORDER BY salary DESC) AS rank
+    FROM Employee E
+        INNER JOIN Department D ON D.id = E.departmentId
 )
 SELECT
-    Department
-    ,Employee
-    ,Salary
-FROM cte
-WHERE erank < 4
+     department_name AS Department
+    ,employee_name AS Employee
+    ,salary AS Salary
+FROM CTE
+WHERE rank < 4
+ORDER BY department_name
 
 // problem
 Table: Employee
