@@ -1,39 +1,67 @@
 ----------solution1--------------------------------------
-WITH PrepTable AS
+WITH TotalEachDay AS
 (
     SELECT
-        ROW_NUMBER() OVER (ORDER BY visited_on) as RowNumber
-        ,visited_on
-        ,SUM(amount) OVER (ORDER BY visited_on ROWS 6 PRECEDING) AS amount
-        ,ROUND((SUM(amount) OVER (ORDER BY visited_on ROWS 6 PRECEDING)+0.00)/7, 2) AS average_amount
-    FROM 
-    (SELECT visited_on ,SUM(amount) AS amount
-     FROM Customer 
-     GROUP BY visited_on
-    ) AS tmp
+         visited_on
+        ,SUM(amount) AS total_amount
+    FROM Customer
+    GROUP BY visited_on
+), SevenDaysTotal AS
+(
+    SELECT
+         visited_on
+        ,total_amount
+        ,LAG(total_amount, 1) OVER (ORDER BY visited_on) AS lag1
+        ,LAG(total_amount, 2) OVER (ORDER BY visited_on) AS lag2
+        ,LAG(total_amount, 3) OVER (ORDER BY visited_on) AS lag3
+        ,LAG(total_amount, 4) OVER (ORDER BY visited_on) AS lag4
+        ,LAG(total_amount, 5) OVER (ORDER BY visited_on) AS lag5
+        ,LAG(total_amount, 6) OVER (ORDER BY visited_on) AS lag6
+    FROM TotalEachDay
 )
 SELECT 
-    visited_on
-    ,amount
-    ,average_amount 
-FROM PrepTable
-WHERE (RowNumber - 6) > 0
+     visited_on
+    ,(total_amount + lag1 + lag2 + lag3 + lag4 + lag5 + lag6) AS amount
+    ,ROUND(((total_amount + lag1 + lag2 + lag3 + lag4 + lag5 + lag6)*1.00/7), 2) AS average_amount
+FROM SevenDaysTotal
+WHERE lag6 IS NOT NULL
 ORDER BY visited_on
----------------solution2------------------------------
+----------solution2--------------------------------------
+WITH TotalEachDay AS
+(
+    SELECT
+         visited_on
+        ,SUM(amount) AS total_amount
+    FROM Customer
+    GROUP BY visited_on
+), SevenDaysTotal AS
+(
+    SELECT
+         visited_on
+        ,ROW_NUMBER() OVER (ORDER BY visited_on) AS row_num
+        ,SUM(total_amount) OVER(ORDER BY visited_on ROWS 6 PRECEDING) AS amount
+        ,ROUND(SUM(total_amount) OVER(ORDER BY visited_on ROWS 6 PRECEDING)*1.00/7, 2) AS average_amount
+    FROM TotalEachDay
+)
+SELECT 
+     visited_on
+    ,amount
+    ,average_amount
+FROM SevenDaysTotal
+WHERE row_num > 6 
+ORDER BY visited_on
+---------------solution3------------------------------
 WITH PrepTable AS
 (
     SELECT
         C.customer_id
-        --,CC.amount
         ,C.visited_on
-        --,CC.visited_on
         ,SUM(CC.amount) AS sum_amount
     FROM Customer C
         CROSS JOIN Customer CC
     WHERE CC.visited_on BETWEEN DATEADD(day, -6, C.visited_on) AND C.visited_on
     GROUP BY C.customer_id, C.visited_on
     HAVING (SELECT DISTINCT customer_id FROM Customer WHERE visited_on = DATEADD(day, -6, C.visited_on)) IS NOT NULL
-    --ORDER BY C.customer_id DESC
 )
 SELECT
     visited_on
