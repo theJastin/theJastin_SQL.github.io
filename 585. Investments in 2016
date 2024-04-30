@@ -1,16 +1,38 @@
-// solution
-WITH cte AS
+------------------------------solution 1---------------------------------------
+WITH CTE AS
 (
     SELECT
         tiv_2016
-        , COUNT(*) OVER (PARTITION BY tiv_2015) AS cnt_15
-        , COUNT(*) OVER (PARTITION BY lat, lon) AS location_cnt
+        ,COUNT(*) OVER(PARTITION BY tiv_2015) AS tiv_2015_count
+        ,COUNT(*) OVER(PARTITION BY lat, lon) AS location_count
     FROM Insurance
 )
 SELECT
-    ROUND(SUM(tiv_2016)*1.00, 2) AS tiv_2016
-FROM cte
-WHERE cnt_15 > 1 AND location_cnt = 1
+    ROUND(SUM(tiv_2016), 2) AS tiv_2016 
+FROM CTE
+WHERE tiv_2015_count > 1 AND location_count = 1
+------------------------------solution 2---------------------------------------
+WITH CTE1 AS
+(
+    SELECT
+        tiv_2015
+    FROM Insurance
+    GROUP BY tiv_2015
+    HAVING COUNT(*) > 1
+),
+CTE2 AS
+(
+    SELECT 
+        lat, lon
+    FROM Insurance
+    GROUP BY lat, lon
+    HAVING COUNT(*) < 2
+)
+SELECT 
+    ROUND(SUM(tiv_2016), 2) AS tiv_2016
+FROM CTE2 C2
+     INNER JOIN Insurance I ON I.lat = C2.lat AND I.lon = C2.lon
+WHERE I.tiv_2015 IN (SELECT tiv_2015 FROM CTE1)
 
 // problem
 Table: Insurance
