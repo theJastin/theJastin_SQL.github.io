@@ -3,12 +3,11 @@ SELECT
     TOP 1 LEAD(salary) OVER(ORDER BY salary DESC) AS SecondHighestSalary 
 FROM Employee
 GROUP BY salary
-ORDER BY salary DESC
 ---------------solution 2--------------------------------
-select 
-    max(Salary) AS SecondHighestSalary 
-from Employee
-where salary < (Select Max(Salary) from Employee);
+SELECT
+    MAX(salary) AS SecondHighestSalary
+FROM Employee
+WHERE salary < (SELECT MAX(salary) FROM Employee)
 
 // problem
 Table: Employee
