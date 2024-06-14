@@ -27,8 +27,8 @@ GROUP BY C.contest_id, C.hacker_id, C.name
 ORDER BY C.contest_id;
 
 ----------------------solution2-----------------------------------------
- DECLARE @contest_id INT
- SET @contest_id = 845;
+DECLARE @contest_id INT
+SET @contest_id = 845;
  
 WITH submission_CTE AS
 (
@@ -47,8 +47,8 @@ view_CTE AS
         ,SUM(total_unique_views) AS sum_of_total_unique_views
     FROM View_Stats
     GROUP BY challenge_id
-)
-, college_sums_CTE AS
+),
+college_sums_CTE AS
 (
     SELECT 
         Clg.college_id
@@ -61,19 +61,26 @@ view_CTE AS
                LEFT JOIN view_CTE VCTE ON VCTE.challenge_id = Clg.challenge_id
     --WHERE Clg.college_id IN (SELECT college_id FROM Colleges WHERE contest_id = @contest_id)
     GROUP BY  Clg.college_id
+),
+contests_stat_CTE AS
+(
+    SELECT
+        Con.contest_id
+        ,Con.hacker_id
+        ,Con.name
+        ,SUM(CCTE.college_total_submissions) AS S1 
+        ,SUM(CCTE.college_total_accepted_submissions) AS S2
+        ,SUM(CCTE.college_sum_of_total_view) AS V1
+        ,SUM(CCTE.college_total_unique_views) AS V2
+    FROM Colleges Col
+               INNER JOIN college_sums_CTE AS CCTE ON CCTE.college_id = Col.college_id
+               INNER JOIN Contests Con ON Con.contest_id = Col.contest_id
+    GROUP BY Con.contest_id, Con.hacker_id, Con.name
 )
 SELECT
-    Con.contest_id
-    ,Con.hacker_id
-    ,Con.name
-    ,SUM(CCTE.college_total_submissions) AS total_submissions 
-    ,SUM(CCTE.college_total_accepted_submissions) AS total_accepted_submissions
-    ,SUM(CCTE.college_sum_of_total_view) AS total_view
-    ,SUM(CCTE.college_total_unique_views) AS total_unique_views
-FROM Colleges Col
-           INNER JOIN college_sums_CTE AS CCTE ON CCTE.college_id = Col.college_id
-           INNER JOIN Contests Con ON Con.contest_id = Col.contest_id
-GROUP BY Con.contest_id, Con.hacker_id, Con.name
+    *
+FROM contests_stat_CTE
+WHERE S1 + S2 +V1 + V2 != 0
 -------------------------------------------------------------------------------
 
 /* problem
