@@ -1,4 +1,4 @@
-------------------solution----------------------------------
+------------------solution1----------------------------------
 WITH CTE
 AS
 (
@@ -25,6 +25,56 @@ FROM CTE Ch
      INNER JOIN contests C ON C.contest_id = Cl.contest_id
 GROUP BY C.contest_id, C.hacker_id, C.name
 ORDER BY C.contest_id;
+
+----------------------solution2-----------------------------------------
+ DECLARE @contest_id INT
+ SET @contest_id = 845;
+ 
+WITH submission_CTE AS
+(
+    SELECT
+        challenge_id
+        ,SUM(total_submissions) AS sum_of_total_submissions
+        ,SUM(total_accepted_submissions) AS sum_of_total_accepted_submissions
+    FROM Submission_Stats
+    GROUP BY challenge_id
+),
+view_CTE AS
+(
+    SELECT
+        challenge_id
+        ,SUM(total_views) AS sum_of_total_view
+        ,SUM(total_unique_views) AS sum_of_total_unique_views
+    FROM View_Stats
+    GROUP BY challenge_id
+)
+, college_sums_CTE AS
+(
+    SELECT 
+        Clg.college_id
+        ,SUM(sum_of_total_submissions) AS college_total_submissions
+        ,SUM(sum_of_total_accepted_submissions) AS college_total_accepted_submissions
+        ,SUM(sum_of_total_view) AS college_sum_of_total_view
+        ,SUM(sum_of_total_unique_views) AS college_total_unique_views
+    FROM Challenges Clg
+               LEFT JOIN submission_CTE SCTE ON SCTE.challenge_id = Clg.challenge_id
+               LEFT JOIN view_CTE VCTE ON VCTE.challenge_id = Clg.challenge_id
+    --WHERE Clg.college_id IN (SELECT college_id FROM Colleges WHERE contest_id = @contest_id)
+    GROUP BY  Clg.college_id
+)
+SELECT
+    Con.contest_id
+    ,Con.hacker_id
+    ,Con.name
+    ,SUM(CCTE.college_total_submissions) AS total_submissions 
+    ,SUM(CCTE.college_total_accepted_submissions) AS total_accepted_submissions
+    ,SUM(CCTE.college_sum_of_total_view) AS total_view
+    ,SUM(CCTE.college_total_unique_views) AS total_unique_views
+FROM Colleges Col
+           INNER JOIN college_sums_CTE AS CCTE ON CCTE.college_id = Col.college_id
+           INNER JOIN Contests Con ON Con.contest_id = Col.contest_id
+GROUP BY Con.contest_id, Con.hacker_id, Con.name
+-------------------------------------------------------------------------------
 
 /* problem
 Samantha interviews many candidates from different colleges using coding challenges and contests. 
