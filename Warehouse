@@ -1,0 +1,108 @@
+--CREATE TABLE Warehouse (ID VARCHAR(10), OnHandQuantity INT, OnHandQuantityDelta INT, Event_Type VARCHAR(10), Event_Datetime DATETIME)
+-------------------solution------------------------
+WITH first_row AS
+(
+	SELECT Top 1 *
+	FROM Warehouse
+),
+dates AS
+(
+	SELECT
+		 DATEADD(day, -90, Event_Datetime) AS days90 -- 0-90 days
+		,DATEADD(day, -180, Event_Datetime) AS days180 -- 91-180 days
+		,DATEADD(day, -270, Event_Datetime) AS days270 -- 181-270 days
+		,DATEADD(day, -365, Event_Datetime) AS days365 -- 271-365 days
+	FROM first_row 
+),
+inventory90days AS
+(
+	SELECT
+		(CASE WHEN inventory90days > OnHandQuantity THEN OnHandQuantity ELSE inventory90days END) AS inventory90days_final
+	FROM 
+		(SELECT
+			COALESCE(SUM(OnHandQuantityDelta), 0) AS inventory90days
+		FROM Warehouse
+			 cross join dates
+		WHERE Event_Type = 'InBound' AND Event_Datetime >= days90) TMP
+		CROSS JOIN first_row
+),
+inventory180days AS
+(
+	SELECT
+		(CASE WHEN inventory180days > (OnHandQuantity - inventory90days_final) THEN (OnHandQuantity - inventory90days_final) ELSE inventory180days END) AS inventory180days_final
+	FROM 
+		(	SELECT
+				COALESCE(SUM(OnHandQuantityDelta), 0) AS inventory180days
+			FROM Warehouse
+				 CROSS JOIN dates
+				 CROSS JOIN inventory90days
+			WHERE Event_Type = 'InBound' AND Event_Datetime >= days180
+		) TMP
+		CROSS JOIN first_row
+		CROSS JOIN inventory90days
+),
+inventory270days AS
+(
+	SELECT
+		(CASE WHEN inventory270days > (OnHandQuantity - inventory90days_final - inventory180days_final) THEN (OnHandQuantity - inventory90days_final - inventory180days_final) ELSE inventory270days END) AS inventory270days_final
+	FROM 
+		(SELECT
+			COALESCE(SUM(OnHandQuantityDelta), 0) AS inventory270days
+		FROM Warehouse
+			 CROSS JOIN dates
+		WHERE Event_Type = 'InBound' AND Event_Datetime >= days270) TMP
+		CROSS JOIN first_row
+		CROSS JOIN inventory90days
+		CROSS JOIN inventory180days
+),
+inventory365days AS
+(
+	SELECT
+		(CASE WHEN inventory365days > (OnHandQuantity - inventory90days_final - inventory180days_final - inventory270days_final) THEN (OnHandQuantity - inventory90days_final - inventory180days_final - inventory270days_final) ELSE inventory365days END) AS inventory365days_final
+	FROM 
+		(SELECT
+			COALESCE(SUM(OnHandQuantityDelta), 0) AS inventory365days
+		FROM Warehouse
+			 CROSS JOIN dates
+		WHERE Event_Type = 'InBound' AND Event_Datetime >= days365) TMP
+		CROSS JOIN first_row
+		CROSS JOIN inventory90days
+		CROSS JOIN inventory180days
+		CROSS JOIN inventory270days
+)
+SELECT
+	 inventory90days_final AS '0-90 days old'
+	,inventory180days_final AS '91-180 days old'
+	,inventory270days_final AS '181-270 days old'
+	,inventory365days_final AS '271-365 days old'
+FROM inventory90days
+	 CROSS JOIN inventory180days
+	 CROSS JOIN inventory270days
+	 CROSS JOIN inventory365days
+
+---------problem-----------------------
+Q) We want to generate an inventory age report which would show the distribution of remaining inventory across the length of time the inventory has been sitting at the warehouse. 
+We are trying to classify the inventory on hand across the below 4 buckets to denote the time the inventory has been lying the warehouse.
+
+0-90 days old 
+91-180 days old
+181-270 days old
+271 – 365 days old
+
+For example, the warehouse received 100 units yesterday and shipped 30 units today, then there are 70 units which are a day old.
+
+The warehouses use FIFO (first in first out) approach to manage inventory, i.e., the inventory that comes first will be sent out first. 
+
+
+For example, on 20th May 2019, 250 units were inbounded into the FC. On 22nd May 2019, 8 units were shipped out (outbound) from the FC, 
+reducing inventory on hand to 242 units. On 31st December, 120 units were further inbounded into the FC increasing the inventory on hand from 242 to 362.On 29th January 2020, 
+27 units were shipped out reducing the inventory on hand to 335 units.
+On 29th January, of the 335 units on hands, 120 units were 0-90 days old (29 days old) and 215 units were 181-270 days old (254 days old).
+
+Columns:
+ID of the log entry
+OnHandQuantity: Quantity in warehouse after an event
+OnHandQuantityDelta: Change in on-hand quantity due to an event
+event_type: Inbound – inventory being brought into the warehouse; Outbound – inventory being sent out of warehouse
+event_datetime: date- time of event
+The data is sorted with latest entry at top.
