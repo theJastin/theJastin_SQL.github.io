@@ -29,7 +29,6 @@ CTE1 AS
 ),
 CTE2 AS
 (
-        -- anchor
         SELECT 
             submission_date
             ,hacker_id
