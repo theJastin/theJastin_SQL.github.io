@@ -52,7 +52,7 @@ FROM
 
 ) C
     INNER JOIN CTE1 C1 ON C1.submission_date = C.submission_date
-    INNER JOIN Hackers H ON H.hacker_id = C.hacker_idhttps://www.hackerrank.com/challenges/weather-observation-station-16?isFullScreen=true
+    INNER JOIN Hackers H ON H.hacker_id = C.hacker_id
 WHERE rank = 1
 ORDER BY submission_date
 
