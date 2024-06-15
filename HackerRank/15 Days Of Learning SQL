@@ -1,0 +1,63 @@
+----------------------------solution------------------------------------------
+WITH CTE AS
+(
+        -- anchor
+            SELECT
+                submission_date
+                ,hacker_id
+            FROM Submissions 
+            WHERE submission_date = '2016-03-01'
+    
+        UNION ALL
+    
+        -- recursion
+            SELECT
+                S.submission_date
+                ,S.hacker_id
+            FROM CTE C
+                        INNER JOIN Submissions S ON S.hacker_id = C.hacker_id
+            WHERE S.submission_date = DATEADD(day, 1, C.submission_date) AND S.submission_date < '2016-03-16'
+),
+CTE1 AS
+(
+    SELECT 
+        submission_date
+        ,COUNT(DISTINCT hacker_id) AS total_submissions_by_day
+    FROM CTE
+    GROUP BY submission_date
+    --ORDER BY submission_date
+),
+CTE2 AS
+(
+        -- anchor
+        SELECT 
+            submission_date
+            ,hacker_id
+            ,COUNT(*) AS total_submissions_by_hacker
+        FROM Submissions S
+        GROUP BY submission_date, hacker_id
+)
+SELECT 
+    C.submission_date
+    ,C1.total_submissions_by_day
+    ,C.hacker_id
+    ,H.name
+FROM
+(
+    SELECT 
+        *
+        ,rank() OVER(PARTITION BY submission_date ORDER BY total_submissions_by_hacker DESC, hacker_id ) AS rank
+    FROM CTE2
+    WHERE total_submissions_by_hacker > 1
+
+) C
+    INNER JOIN CTE1 C1 ON C1.submission_date = C.submission_date
+    INNER JOIN Hackers H ON H.hacker_id = C.hacker_idhttps://www.hackerrank.com/challenges/weather-observation-station-16?isFullScreen=true
+WHERE rank = 1
+ORDER BY submission_date
+
+---------------problem-------------------------------
+/*Julia conducted a  days of learning SQL contest. The start date of the contest was March 01, 2016 and the end date was March 15, 2016.
+Write a query to print total number of unique hackers who made at least  submission each day (starting on the first day of the contest), 
+and find the hacker_id and name of the hacker who made maximum number of submissions each day. If more than one such hacker has a maximum number of submissions, 
+print the lowest hacker_id. The query should print this information for each day of the contest, sorted by the date.*/
