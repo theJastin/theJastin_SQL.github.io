@@ -1,0 +1,39 @@
+SET NOCOUNT ON;
+
+
+WITH MAX_CTE AS
+(
+    SELECT
+        MONTH(record_date) AS month
+        ,MAX(data_value) AS [max]
+    FROM temperature_records  
+    WHERE data_type = 'max'
+    GROUP BY MONTH(record_date)
+),
+MIN_CTE AS
+(
+    SELECT
+        MONTH(record_date) AS month
+        ,MIN(data_value) AS [min]
+    FROM temperature_records  
+    WHERE data_type = 'min'
+    GROUP BY MONTH(record_date)
+),
+AVG_CTE AS
+(
+    SELECT
+        MONTH(record_date) AS month
+        ,AVG(data_value) AS [avg]
+    FROM temperature_records  
+    WHERE data_type = 'avg'
+    GROUP BY MONTH(record_date)
+)
+SELECT 
+    M.month
+    ,M.[max]
+    ,MI.[min],
+    A.[avg]
+FROM MAX_CTE M
+     INNER JOIN MIN_CTE MI ON MI.month = M.month
+     INNER JOIN AVG_CTE A ON A.month = M.month
+go
