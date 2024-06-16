@@ -1,0 +1,35 @@
+-- First, calculate time difference between transactions from one sender
+WITH [difference] AS 
+(
+	SELECT
+		 *
+		,DATEDIFF(minute, lag(dt) OVER(PARTITION BY sender ORDER BY sender,dt), dt) as diff_minute
+  		,ROW_NUMBER() OVER(ORDER BY sender,dt) as rownumber
+	FROM transactions
+),
+-- Second, select only transactions which happened in 60 min or less
+[row_number] AS 
+(
+	SELECT
+		rownumber
+	FROM [difference]
+	WHERE diff_minute <= 60
+)
+,[sequences] AS 
+( 
+	SELECT 
+		*
+	FROM [difference]
+	WHERE rownumber IN(SELECT rownumber FROM [row_number] UNION SELECT rownumber - 1 as rownumber FROM [row_number])
+)
+-- Third, output values
+SELECT 
+        sender
+       ,MIN(dt) as Sequence_start
+       ,MAX(dt) as Sequence_end
+       ,COUNT(rownumber) as transactions_count
+       ,SUM(amount) as transactions_sum
+FROM [sequences]
+GROUP BY sender
+HAVING SUM(amount) >= 150
+order by sender, MIN(dt), MAX(dt)
