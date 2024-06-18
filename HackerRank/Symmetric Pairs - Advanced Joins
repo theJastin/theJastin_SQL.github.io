@@ -1,4 +1,19 @@
----------------------solution----------------------------
+---------------------solution1----------------------------
+WITH CTE AS
+(
+    SELECT
+        *
+        ,ROW_NUMBER() OVER(ORDER BY X) AS row_n
+    FROM Functions
+)
+SELECT
+    DISTINCT F1.X
+    ,F1.Y
+FROM CTE F1
+            cross join CTE F2
+WHERE F1.x = F2.y AND F1.y = F2.x AND F1.row_n != F2.row_n AND F1.X <= F1.Y
+ORDER BY F1.X
+---------------------solution2----------------------------
 WITH CTE
 AS
 (
@@ -13,6 +28,7 @@ FROM CTE AS F1
 WHERE F1.row_num != F2.row_num
       AND F1.X <= F1.Y
 ORDER BY F1.X;
+--------------------------------------------------------
 
 /* Symmetric Pairs problem
 You are given a table, Functions, containing two columns: X and Y.
