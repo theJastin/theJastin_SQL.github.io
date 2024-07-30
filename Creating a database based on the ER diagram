@@ -1,0 +1,121 @@
+/*Creating a database based on the ER diagram*/
+
+CREATE DATABASE DreamlineAI_Database;
+
+CREATE TABLE Incentive_Program (
+	Program_ID VARCHAR(15), 
+    Program_Name VARCHAR(100),
+    Incentive_Amount DECIMAL,
+    Maximum_Incentive DECIMAL,
+    Eligible_System_Size TEXT,
+    Equipment_requirements TEXT,
+    Instalation_Requirements TEXT,
+    Carryover_Provisions TEXT,
+    Elig_Efficiency_Tech TEXT,
+    Additional_Detail TEXT,
+    Eligible_Tech_Storage TEXT,
+    Website TEXT,
+    Applicable_ID VARCHAR(10),
+    Administrator_ID VARCHAR(10),
+    Implementing_ID VARCHAR(10),
+    Type_ID VARCHAR(10),
+    Category_ID VARCHAR(10),
+    PRIMARY KEY (Program_ID)
+);
+
+CREATE TABLE Incentives
+(
+	Incentive_ID VARCHAR(15), 
+    Program_ID VARCHAR(15),
+    PRIMARY KEY (Incentive_ID)
+);
+
+CREATE TABLE Implementing
+(
+	Implementing_ID VARCHAR(15),
+    Implementing_Sector VARCHAR(100),
+    STATE_FEDERAL BOOLEAN,
+    PRIMARY KEY (Implementing_ID)
+);
+
+CREATE TABLE Applicable
+(
+	Applicable_ID VARCHAR(15),
+    Applicable_Sector VARCHAR(30),
+    Postal_Code VARCHAR(10),
+    State_ID VARCHAR(30),
+    City_Name VARCHAR(50),
+    PRIMARY KEY (Applicable_ID)
+);
+
+CREATE TABLE Administrator
+(
+	Administrator_ID VARCHAR(15),
+    Administrator_Name VARCHAR(100),
+    PRIMARY KEY (Administrator_ID)
+);
+
+CREATE TABLE Incentive_Type
+(
+	Type_ID VARCHAR(15),
+    Type_Name VARCHAR(100),
+    PRIMARY KEY (Type_ID)
+);
+
+CREATE TABLE Incentive_Category
+(
+	Category_ID VARCHAR(15),
+    Category_Name VARCHAR(100),
+    PRIMARY KEY (Category_ID)
+);
+
+CREATE TABLE Parcel
+(
+	Parcel_ID INTEGER NOT NULL AUTO_INCREMENT,
+    Parcel_Name VARCHAR(100),
+    Parcel_Desc VARCHAR(100),
+    PRIMARY KEY (Parcel_ID)
+);
+
+CREATE TABLE Land
+(
+	Land_ID INTEGER NOT NULL AUTO_INCREMENT,
+    Land_Type VARCHAR(100),
+    PRIMARY KEY (Land_ID)
+);
+
+CREATE TABLE Users
+(
+	User_ID INTEGER NOT NULL AUTO_INCREMENT,
+    User_Email_ID INTEGER,
+    First_Name VARCHAR(30),
+    Last_Name VARCHAR(30),
+    Password VARCHAR(20),
+    User_Type_ID INTEGER,
+    PRIMARY KEY (User_ID)
+);
+
+CREATE TABLE Users_Types
+(
+	Users_Type_ID INTEGER NOT NULL AUTO_INCREMENT,
+    Type_Name VARCHAR(100),
+    Description TEXT,
+    PRIMARY KEY (Users_Type_ID)
+);
+
+CREATE TABLE Login_Attempts
+(
+	Login_ID INTEGER NOT NULL AUTO_INCREMENT,
+    User_ID INTEGER,
+    DLast_Login DATETIME,
+    PRIMARY KEY (Login_ID)
+);
+
+CREATE TABLE Verification_Codes
+(
+	Code_ID INTEGER NOT NULL AUTO_INCREMENT,
+    User_ID INTEGER,
+    Code VARCHAR(100),
+    Created_at DATETIME,
+    PRIMARY KEY (Code_ID)
+);
